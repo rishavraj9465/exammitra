@@ -16,6 +16,16 @@ async function getApplication() {
     );
   if (!["none", "blob", "s3"].includes(config.storage))
     throw new Error("STORAGE_DRIVER must be none, blob or s3.");
+  if (config.storage === "blob" && !process.env.BLOB_READ_WRITE_TOKEN) {
+    console.warn(
+      "BLOB_READ_WRITE_TOKEN is missing; continuing without original PDF storage.",
+    );
+    config.storage = "none";
+  }
+  if (config.storage === "s3" && !config.bucket) {
+    console.warn("S3_BUCKET is missing; continuing without original PDF storage.");
+    config.storage = "none";
+  }
   if (!connecting)
     connecting = mongoose.connect(config.mongo, {
       serverSelectionTimeoutMS: 8000,
