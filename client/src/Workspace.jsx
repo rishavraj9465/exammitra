@@ -185,7 +185,12 @@ export default function Workspace({ sample = false }) {
           <button
             className="button secondary"
             onClick={() => setSource(1)}
-            disabled={!sample && !pack.pageCount}
+            disabled={!sample && !pack.fileKey}
+            title={
+              !sample && !pack.fileKey
+                ? "Original PDF storage is disabled"
+                : undefined
+            }
           >
             <BookOpen size={16} /> Source PDF
           </button>

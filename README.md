@@ -90,15 +90,15 @@ the following project environment variables before deploying:
 - `CLIENT_URL` (the exact Vercel production URL)
 - `GEMINI_API_KEY`
 - `GEMINI_MODEL`
-- `STORAGE_DRIVER=blob`
-- `BLOB_READ_WRITE_TOKEN` (added automatically when a private Vercel Blob
-  store is connected to the project)
+- `STORAGE_DRIVER=none` for a storage-free deployment. Uploaded PDFs are
+  discarded after their page text is extracted, so original source-PDF viewing
+  is unavailable for those packs. Notes and page citations remain available.
 
 PDF generation is started by the study-pack screen and may remain open for
 several minutes while the Vercel Function completes. The function is configured
 for a 300-second maximum duration. Uploaded files are never written to Vercel's
-temporary filesystem. Private S3-compatible storage remains supported as an
-alternative.
+temporary filesystem. Private Vercel Blob and S3-compatible storage remain
+supported when retaining original PDFs is required.
 
 ## Current limitations
 

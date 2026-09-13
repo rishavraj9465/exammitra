@@ -14,6 +14,15 @@ export function createStorage(options = config) {
       throw new Error("Invalid storage key");
     return path.join(options.dataDir, "uploads", key);
   };
+  if (options.storage === "none") {
+    return {
+      async put() {},
+      async get() {
+        throw new Error("Original PDF storage is disabled");
+      },
+      async delete() {},
+    };
+  }
   if (options.storage === "blob") {
     if (!process.env.BLOB_READ_WRITE_TOKEN)
       throw new Error("BLOB_READ_WRITE_TOKEN is required");

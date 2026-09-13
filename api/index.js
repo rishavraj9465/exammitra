@@ -14,8 +14,8 @@ async function getApplication() {
     throw new Error(
       "Vercel requires MONGODB_URI and JWT_SECRET with at least 32 characters.",
     );
-  if (!["blob", "s3"].includes(config.storage))
-    throw new Error("Vercel requires STORAGE_DRIVER=blob or s3.");
+  if (!["none", "blob", "s3"].includes(config.storage))
+    throw new Error("STORAGE_DRIVER must be none, blob or s3.");
   if (!connecting)
     connecting = mongoose.connect(config.mongo, {
       serverSelectionTimeoutMS: 8000,

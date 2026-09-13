@@ -20,6 +20,7 @@ import {
   Conversation,
 } from "./models.js";
 import { markdown, pdfExport } from "./services/exports.js";
+import { extractPdf } from "./services/pdf.js";
 import { samplePack, samplePages } from "../shared/sample.js";
 const err = (status, message) => Object.assign(new Error(message), { status });
 const cleanUser = (u) => ({
@@ -254,8 +255,10 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
         503,
         "Gemini is not configured. Add GEMINI_API_KEY on the server. Try the sample study pack meanwhile.",
       );
-    const fileKey = `${randomUUID()}.pdf`;
-    await storage.put(fileKey, req.file.buffer);
+    const storageDisabled = options.storage === "none";
+    const fileKey = storageDisabled ? "" : `${randomUUID()}.pdf`;
+    const pages = storageDisabled ? await extractPdf(req.file.buffer) : [];
+    if (!storageDisabled) await storage.put(fileKey, req.file.buffer);
     let pack;
     try {
       pack = await Pack.create({
@@ -265,6 +268,8 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
         detail: v.detail,
         fileKey,
         fileName: req.file.originalname.slice(0, 180),
+        pages,
+        pageCount: pages.length || undefined,
         lastOpenedAt: new Date(),
       });
       await Job.create({
@@ -273,7 +278,7 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
         stage: "Waiting to read your PDF",
       });
     } catch (e) {
-      await storage.delete(fileKey);
+      if (fileKey) await storage.delete(fileKey);
       if (pack) await Pack.deleteOne({ _id: pack._id });
       throw e;
     }
@@ -377,6 +382,11 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
     res.json({ pack, job });
   });
   app.get("/api/packs/:packId/source", async (req, res) => {
+    if (!req.pack.fileKey)
+      throw err(
+        410,
+        "The original PDF is not retained when file storage is disabled.",
+      );
     res.set("Cache-Control", "private, no-store");
     res.set("Content-Disposition", 'inline; filename="lecture.pdf"');
     res.type("application/pdf").send(await storage.get(req.pack.fileKey));
