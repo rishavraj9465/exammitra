@@ -132,6 +132,22 @@ export function createAI(options = config) {
   }
   return {
     async generate(pages, detail, onProgress = async () => {}) {
+      const completeSource = pages
+        .map((page) => `\n[Page ${page.number}]\n${page.text}\n`)
+        .join("");
+      // Most lecture PDFs fit comfortably in Gemini's context window. Generating
+      // them in one call keeps the Vercel request below its function duration and
+      // avoids a second synthesis response that can drift from the JSON schema.
+      if (completeSource.length <= 60000) {
+        await onProgress(0, 1);
+        const content = await request(
+          `Create ${detail} revision notes from the complete source below. Include an overview, topic notes covering every supplied page, key terms, formulas only if present, exactly FIVE multiple-choice questions (4 distinct options each, zero-based answer index), and exactly TEN flashcards. Every item must cite only the original page numbers.\nSOURCE:\n${completeSource}`,
+          jsonSchema,
+          (v) => validateContent(v, pages.length),
+        );
+        await onProgress(1, 1);
+        return content;
+      }
       const chunks = chunkPages(pages);
       const evidence = [];
       for (let i = 0; i < chunks.length; i++) {
