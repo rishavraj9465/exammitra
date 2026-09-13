@@ -1,4 +1,11 @@
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { WorkerMessageHandler } from "pdfjs-dist/legacy/build/pdf.worker.mjs";
+
+// pdf.js normally imports this worker dynamically. Serverless bundlers cannot
+// discover that runtime import, so expose the statically bundled handler for
+// pdf.js's Node/fake-worker path.
+globalThis.pdfjsWorker ||= { WorkerMessageHandler };
+
 export async function extractPdf(buffer) {
   if (!buffer.subarray(0, 1024).includes(Buffer.from("%PDF-")))
     throw new Error(
