@@ -66,7 +66,17 @@ export default function Workspace({ sample = false }) {
         if (cancelled) return;
         setData(result);
         setError("");
-        if (["queued", "reading", "generating"].includes(result.pack.status))
+        if (result.pack.status === "queued") {
+          api("/packs/" + id + "/process", { method: "POST" })
+            .catch((e) => {
+              if (!cancelled) setError(e.message);
+            })
+            .finally(() => {
+              if (!cancelled) timer = setTimeout(load, 500);
+            });
+          return;
+        }
+        if (["reading", "generating"].includes(result.pack.status))
           timer = setTimeout(load, 2500);
       } catch (e) {
         if (!cancelled) setError(e.message);

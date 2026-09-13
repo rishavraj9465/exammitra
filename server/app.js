@@ -354,6 +354,18 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
     res.json({ job });
     worker?.tick().catch(() => {});
   });
+  app.post("/api/packs/:packId/process", aiLimit, async (req, res) => {
+    if (!worker) throw err(503, "Study-pack processing is unavailable.");
+    if (req.pack.status === "ready") return res.json({ pack: req.pack });
+    if (req.pack.status === "failed")
+      throw err(409, "Retry this study pack before processing it again.");
+    await worker.tick(req.pack._id);
+    const [pack, job] = await Promise.all([
+      Pack.findById(req.pack._id),
+      Job.findOne({ pack: req.pack._id }),
+    ]);
+    res.json({ pack, job });
+  });
   app.get("/api/packs/:packId/source", async (req, res) => {
     res.set("Cache-Control", "private, no-store");
     res.set("Content-Disposition", 'inline; filename="lecture.pdf"');

@@ -4,12 +4,12 @@ import { publicAIError } from "./ai.js";
 export function createWorker({ storage, ai, extract = extractPdf }) {
   let running = false,
     stopped = false;
-  async function tick() {
+  async function tick(packId) {
     if (running || stopped) return;
     running = true;
     try {
       const job = await Job.findOneAndUpdate(
-        { status: "queued" },
+        { status: "queued", ...(packId ? { pack: packId } : {}) },
         { $set: { status: "reading", stage: "Reading your PDF", error: "" } },
         { new: true, sort: { createdAt: 1 } },
       );

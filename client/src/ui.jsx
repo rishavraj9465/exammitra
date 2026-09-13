@@ -29,11 +29,12 @@ import { useApp } from "./context";
 import { api } from "./api";
 export function Brand() {
   return (
-    <Link className="brand" to="/">
-      <span>
-        <BookOpen />
-      </span>
-      ExamMitra<span className="ai-label">AI</span>
+    <Link className="brand" to="/" aria-label="ExamMitra home">
+      <img
+        className="brand-logo"
+        src="/brand/exammitra-logo.png"
+        alt="ExamMitra"
+      />
     </Link>
   );
 }
