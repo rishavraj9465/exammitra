@@ -27,6 +27,7 @@ const cleanUser = (u) => ({
   name: u.name,
   email: u.email,
   notesPreference: u.notesPreference,
+  guest: u.email.endsWith("@guest.exammitra.local"),
 });
 const text = (n = 200) => z.string().trim().min(1).max(n);
 export function createApp({ storage, ai, options = config, worker } = {}) {
@@ -188,6 +189,15 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
   app.post("/api/auth/logout", (req, res) => {
     res.clearCookie("session", { ...cookie, maxAge: undefined });
     res.json({ ok: true });
+  });
+  app.post("/api/auth/guest", authLimit, async (req, res) => {
+    const id = randomUUID();
+    const user = await User.create({
+      name: "Student",
+      email: `${id}@guest.exammitra.local`,
+      password: id,
+    });
+    sign(res, user);
   });
   app.use("/api", async (req, res, next) => {
     try {

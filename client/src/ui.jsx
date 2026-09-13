@@ -198,7 +198,7 @@ export function Shell() {
 
   if (loading) return <Loading />;
   if (!user)
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/" replace />;
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -237,13 +237,15 @@ export function Shell() {
             <strong>{user.name}</strong>
             <small>Personal workspace</small>
           </span>
-          <button
-            className="icon-button"
-            aria-label="Sign out"
-            onClick={signOut}
-          >
-            <LogOut size={17} />
-          </button>
+          {!user.guest && (
+            <button
+              className="icon-button"
+              aria-label="Sign out"
+              onClick={signOut}
+            >
+              <LogOut size={17} />
+            </button>
+          )}
         </div>
       </aside>
       <div className="app-body">
@@ -285,7 +287,7 @@ export function Shell() {
                     </span>
                     <span>
                       <strong>{user.name}</strong>
-                      <small>{user.email}</small>
+                      <small>{user.guest ? "Guest workspace" : user.email}</small>
                     </span>
                   </div>
                   <Link
@@ -295,9 +297,11 @@ export function Shell() {
                   >
                     <Settings size={16} /> Profile settings
                   </Link>
-                  <button type="button" role="menuitem" onClick={signOut}>
-                    <LogOut size={16} /> Sign out
-                  </button>
+                  {!user.guest && (
+                    <button type="button" role="menuitem" onClick={signOut}>
+                      <LogOut size={16} /> Sign out
+                    </button>
+                  )}
                   {error && (
                     <small className="profile-error" role="alert">
                       {error}

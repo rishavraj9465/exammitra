@@ -205,7 +205,7 @@ export default function Workspace({ sample = false }) {
             You’re exploring a curated sample. Practice stays on this device;
             answers are not live AI.
           </span>
-          <Link to="/register">
+          <Link to="/app/upload">
             Make it yours <ArrowUpRight size={16} />
           </Link>
         </div>
@@ -373,8 +373,8 @@ export default function Workspace({ sample = false }) {
         <Brand />
         <nav>
           <ThemeToggle />
-          <Link className="button primary" to="/register">
-            Create your workspace <ArrowUpRight size={16} />
+          <Link className="button primary" to="/app/upload">
+            Create a study pack <ArrowUpRight size={16} />
           </Link>
         </nav>
       </header>
