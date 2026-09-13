@@ -74,7 +74,7 @@ export default function Landing() {
                     </span>
                     <span>
                       <strong>{user.name}</strong>
-                      <small>{user.guest ? "Guest workspace" : user.email}</small>
+                      <small>{user.email}</small>
                     </span>
                     <ChevronDown size={15} />
                   </button>
@@ -86,17 +86,15 @@ export default function Landing() {
                         </span>
                         <span>
                           <strong>{user.name}</strong>
-                          <small>{user.guest ? "Guest workspace" : user.email}</small>
+                          <small>{user.email}</small>
                         </span>
                       </div>
                       <Link to="/app/settings" role="menuitem">
                         <Settings size={16} /> Profile settings
                       </Link>
-                      {!user.guest && (
-                        <button type="button" role="menuitem" onClick={signOut}>
-                          <LogOut size={16} /> Sign out
-                        </button>
-                      )}
+                      <button type="button" role="menuitem" onClick={signOut}>
+                        <LogOut size={16} /> Sign out
+                      </button>
                       {profileError && (
                         <small className="profile-error" role="alert">
                           {profileError}
@@ -108,8 +106,11 @@ export default function Landing() {
               </>
             ) : (
               <>
-                <Link className="button primary" to="/app/upload">
-                  Start studying <ArrowUpRight size={17} />
+                <Link className="nav-signin" to="/login">
+                  Sign in
+                </Link>
+                <Link className="button primary" to="/register">
+                  Get started <ArrowUpRight size={17} />
                 </Link>
               </>
             ))}
@@ -135,7 +136,7 @@ export default function Landing() {
             <div className="hero-v2-actions">
               <Link
                 className="button primary"
-                to="/app/upload"
+                to={user ? "/app/upload" : "/register"}
               >
                 {user ? "New study pack" : "Create a study pack"}{" "}
                 <ArrowUpRight size={18} />

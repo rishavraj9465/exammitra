@@ -6,12 +6,11 @@ import {
   Route,
   Link,
   useLocation,
-  Navigate,
 } from "react-router-dom";
 import { Provider } from "./context";
 import { Shell, Privacy } from "./ui";
 import Landing from "./Landing";
-import { Dashboard, Library, Upload, Progress, Settings } from "./pages";
+import { Auth, Dashboard, Library, Upload, Progress, Settings } from "./pages";
 import Workspace from "./Workspace";
 import "./styles.css";
 class ErrorBoundary extends React.Component {
@@ -47,8 +46,8 @@ createRoot(document.getElementById("root")).render(
         <ScrollReset />
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Navigate to="/app" replace />} />
-          <Route path="/register" element={<Navigate to="/app" replace />} />
+          <Route path="/login" element={<Auth />} />
+          <Route path="/register" element={<Auth register />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/sample" element={<Workspace sample />} />
           <Route path="/app" element={<Shell />}>

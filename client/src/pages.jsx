@@ -883,12 +883,10 @@ export function Settings() {
                 defaultValue={user.name}
               />
             </label>
-            {!user.guest && (
-              <label>
-                Email
-                <input value={user.email} disabled />
-              </label>
-            )}
+            <label>
+              Email
+              <input value={user.email} disabled />
+            </label>
             <label>
               Default revision notes
               <select

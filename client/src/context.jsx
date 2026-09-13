@@ -15,9 +15,6 @@ export function Provider({ children }) {
   useEffect(() => {
     api("/auth/me")
       .then((r) => setUser(r.user))
-      .catch(() =>
-        api("/auth/guest", { method: "POST" }).then((r) => setUser(r.user)),
-      )
       .catch(() => {})
       .finally(() => setLoading(false));
     api("/health")
