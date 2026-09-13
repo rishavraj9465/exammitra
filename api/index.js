@@ -34,7 +34,12 @@ async function getApplication() {
   const storage = createStorage();
   const ai = createAI();
   const worker = createWorker({ storage, ai });
-  application = createApp({ storage, ai, worker });
+  application = createApp({
+    storage,
+    ai,
+    worker,
+    options: { ...config, serverless: true },
+  });
   return application;
 }
 

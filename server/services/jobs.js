@@ -67,6 +67,10 @@ export function createWorker({ storage, ai, extract = extractPdf }) {
           { status: "ready", stage: "Ready to study" },
         );
       } catch (e) {
+        console.error("Study-pack processing failed:", {
+          name: e.name,
+          message: e.message,
+        });
         const error =
           /PDF|page|text|password|scanned|configured|retry|usage limit|timed out/i.test(
             e.message,

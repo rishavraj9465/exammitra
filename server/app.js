@@ -281,7 +281,7 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
       throw e;
     }
     res.status(202).json({ pack });
-    worker?.tick().catch(() => {});
+    if (!options.serverless) worker?.tick().catch(() => {});
   });
   app.param("packId", async (req, res, next, id) => {
     try {
@@ -365,7 +365,7 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
       { status: "queued", error: "" },
     );
     res.json({ job });
-    worker?.tick().catch(() => {});
+    if (!options.serverless) worker?.tick().catch(() => {});
   });
   app.post("/api/packs/:packId/process", aiLimit, async (req, res) => {
     if (!worker) throw err(503, "Study-pack processing is unavailable.");
@@ -536,7 +536,13 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
         .json({ error: "PDF files must be less than 3 MB." });
     if (e instanceof multer.MulterError)
       return res.status(400).json({ error: "Upload one PDF at a time." });
-    if (!e.status) console.error("Request failed:", e.name);
+    if (!e.status)
+      console.error("Request failed:", {
+        method: req.method,
+        path: req.path,
+        name: e.name,
+        message: e.message,
+      });
     res
       .status(e.status || 500)
       .json({
