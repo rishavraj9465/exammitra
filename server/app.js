@@ -59,10 +59,18 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
   const origins = options.origin.split(",").map((s) => s.trim());
   app.use(cors({ origin: origins, credentials: true }));
   app.use((req, res, next) => {
+    let sameHost = false;
+    if (req.headers.origin)
+      try {
+        sameHost = new URL(req.headers.origin).host === req.get("host");
+      } catch {
+        sameHost = false;
+      }
     if (
       !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
       req.headers.origin &&
-      !origins.includes(req.headers.origin)
+      !origins.includes(req.headers.origin) &&
+      !sameHost
     )
       return next(err(403, "Request origin is not allowed."));
     next();
