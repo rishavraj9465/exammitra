@@ -6,6 +6,7 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
+import { put as putBlob, get as getBlob, del as deleteBlob } from "@vercel/blob";
 import { config } from "../config.js";
 export function createStorage(options = config) {
   const localPath = (key) => {
@@ -13,6 +14,29 @@ export function createStorage(options = config) {
       throw new Error("Invalid storage key");
     return path.join(options.dataDir, "uploads", key);
   };
+  if (options.storage === "blob") {
+    if (!process.env.BLOB_READ_WRITE_TOKEN)
+      throw new Error("BLOB_READ_WRITE_TOKEN is required");
+    const pathname = (key) => `uploads/${key}`;
+    return {
+      async put(key, body) {
+        await putBlob(pathname(key), body, {
+          access: "private",
+          contentType: "application/pdf",
+          allowOverwrite: false,
+        });
+      },
+      async get(key) {
+        const result = await getBlob(pathname(key), { access: "private" });
+        if (!result || result.statusCode !== 200)
+          throw new Error("Stored PDF was not found");
+        return Buffer.from(await new Response(result.stream).arrayBuffer());
+      },
+      async delete(key) {
+        await deleteBlob(pathname(key));
+      },
+    };
+  }
   if (options.storage === "s3") {
     if (!options.bucket) throw new Error("S3_BUCKET is required");
     const client = new S3Client({

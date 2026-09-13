@@ -90,14 +90,15 @@ the following project environment variables before deploying:
 - `CLIENT_URL` (the exact Vercel production URL)
 - `GEMINI_API_KEY`
 - `GEMINI_MODEL`
-- `STORAGE_DRIVER=s3`
-- `S3_BUCKET`, `S3_ENDPOINT`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and
-  `AWS_SECRET_ACCESS_KEY`
+- `STORAGE_DRIVER=blob`
+- `BLOB_READ_WRITE_TOKEN` (added automatically when a private Vercel Blob
+  store is connected to the project)
 
 PDF generation is started by the study-pack screen and may remain open for
 several minutes while the Vercel Function completes. The function is configured
 for a 300-second maximum duration. Uploaded files are never written to Vercel's
-temporary filesystem.
+temporary filesystem. Private S3-compatible storage remains supported as an
+alternative.
 
 ## Current limitations
 
