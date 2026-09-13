@@ -18,7 +18,7 @@ export function createWorker({ storage, ai, extract = extractPdf }) {
         const pack = await Pack.findOne({
           _id: job.pack,
           deleted: false,
-        }).select("+pages");
+        }).select("+pages +sourceData");
         if (!pack) {
           await Job.deleteOne({ _id: job._id });
           return;
@@ -29,10 +29,23 @@ export function createWorker({ storage, ai, extract = extractPdf }) {
         );
         const pages = pack.pages?.length
           ? pack.pages
-          : await extract(await storage.get(pack.fileKey));
+          : await extract(
+              pack.sourceData?.length
+                ? pack.sourceData
+                : await storage.get(pack.fileKey),
+            );
         const updated = await Pack.updateOne(
           { _id: pack._id, deleted: false },
-          { pages, pageCount: pages.length, status: "generating" },
+          {
+            $set: {
+              pages,
+              pageCount: pages.length,
+              status: "generating",
+            },
+            ...(pack.sourceData?.length
+              ? { $unset: { sourceData: 1 } }
+              : {}),
+          },
         );
         if (!updated.matchedCount) return;
         await Job.updateOne(

@@ -90,9 +90,10 @@ the following project environment variables before deploying:
 - `CLIENT_URL` (the exact Vercel production URL)
 - `GEMINI_API_KEY`
 - `GEMINI_MODEL`
-- `STORAGE_DRIVER=none` for a storage-free deployment. Uploaded PDFs are
-  discarded after their page text is extracted, so original source-PDF viewing
-  is unavailable for those packs. Notes and page citations remain available.
+- `STORAGE_DRIVER=none` for a storage-free deployment. Uploaded PDFs are held
+  temporarily in MongoDB and removed after their page text is extracted, so
+  original source-PDF viewing is unavailable for those packs. Notes and page
+  citations remain available.
 
 PDF generation is started by the study-pack screen and may remain open for
 several minutes while the Vercel Function completes. The function is configured

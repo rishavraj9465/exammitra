@@ -25,6 +25,7 @@ export const Pack = model(
       fileName: String,
       pageCount: Number,
       pages: { type: [{ number: Number, text: String }], select: false },
+      sourceData: { type: Buffer, select: false },
       content: Schema.Types.Mixed,
       status: { type: String, default: "queued" },
       error: String,

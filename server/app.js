@@ -20,7 +20,6 @@ import {
   Conversation,
 } from "./models.js";
 import { markdown, pdfExport } from "./services/exports.js";
-import { extractPdf } from "./services/pdf.js";
 import { samplePack, samplePages } from "../shared/sample.js";
 const err = (status, message) => Object.assign(new Error(message), { status });
 const cleanUser = (u) => ({
@@ -255,7 +254,6 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
       );
     const storageDisabled = options.storage === "none";
     const fileKey = storageDisabled ? "" : `${randomUUID()}.pdf`;
-    const pages = storageDisabled ? await extractPdf(req.file.buffer) : [];
     if (!storageDisabled) await storage.put(fileKey, req.file.buffer);
     let pack;
     try {
@@ -266,8 +264,7 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
         detail: v.detail,
         fileKey,
         fileName: req.file.originalname.slice(0, 180),
-        pages,
-        pageCount: pages.length || undefined,
+        sourceData: storageDisabled ? req.file.buffer : undefined,
         lastOpenedAt: new Date(),
       });
       await Job.create({
