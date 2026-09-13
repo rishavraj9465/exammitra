@@ -1,0 +1,22 @@
+{
+  "name": "studyspace-ai",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -k \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client",
+    "start": "npm start -w server",
+    "test": "npm test -w server",
+    "sample": "node scripts/sample-pdf.js",
+    "dev:database": "node scripts/dev-database.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "mongodb-memory-server": "^10.2.0",
+    "prettier": "^3.9.6"
+  }
+}
