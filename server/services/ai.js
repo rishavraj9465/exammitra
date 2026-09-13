@@ -104,13 +104,19 @@ export function createAI(options = config) {
     ? new GoogleGenAI({ apiKey: options.apiKey })
     : null;
   const generationModel = options.generationModel || options.model;
-  async function request(contents, schema, validate, model = options.model) {
+  async function request(
+    contents,
+    schema,
+    validate,
+    model = options.model,
+    maxAttempts = 2,
+  ) {
     if (!ai)
       throw new Error(
         "Gemini is not configured. Add GEMINI_API_KEY to the server environment. The sample study pack is available meanwhile.",
       );
     let last;
-    for (let i = 0; i < 3; i++)
+    for (let i = 0; i < maxAttempts; i++)
       try {
         const response = await ai.models.generateContent({
           model,
@@ -128,7 +134,8 @@ export function createAI(options = config) {
       } catch (e) {
         last = e;
         if (/401|403|404|API.key/i.test(String(e.message))) break;
-        if (i < 2) await new Promise((r) => setTimeout(r, 800 * 2 ** i));
+        if (i + 1 < maxAttempts)
+          await new Promise((r) => setTimeout(r, 500 * 2 ** i));
       }
     throw new Error(publicAIError(last));
   }
@@ -147,6 +154,7 @@ export function createAI(options = config) {
           jsonSchema,
           (v) => validateContent(v, pages.length),
           generationModel,
+          1,
         );
         await onProgress(1, 1);
         return content;
@@ -164,6 +172,7 @@ export function createAI(options = config) {
           }),
           (v) => z.object({ concepts: z.array(note).min(1) }).parse(v),
           generationModel,
+          1,
         );
         const allowed = new Set(
           [...chunks[i].matchAll(/\[Page (\d+)\]/g)].map((m) => Number(m[1])),
@@ -186,6 +195,7 @@ export function createAI(options = config) {
         jsonSchema,
         (v) => validateContent(v, pages.length),
         generationModel,
+        1,
       );
     },
     async answer(pages, question, kind = "question") {
