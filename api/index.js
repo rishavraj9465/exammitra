@@ -9,7 +9,6 @@ let application;
 let connecting;
 
 async function getApplication() {
-  if (application) return application;
   if (!config.mongo || config.secret.length < 32)
     throw new Error(
       "Vercel requires MONGODB_URI and JWT_SECRET with at least 32 characters.",
@@ -26,11 +25,21 @@ async function getApplication() {
     console.warn("S3_BUCKET is missing; continuing without original PDF storage.");
     config.storage = "none";
   }
-  if (!connecting)
-    connecting = mongoose.connect(config.mongo, {
-      serverSelectionTimeoutMS: 8000,
-    });
-  await connecting;
+  // A cached serverless instance can outlive its MongoDB socket. Check the
+  // connection on every invocation and allow a later request to recover from a
+  // transient Atlas/network failure instead of retaining a rejected promise.
+  if (mongoose.connection.readyState !== 1) {
+    if (!connecting)
+      connecting = mongoose.connect(config.mongo, {
+        serverSelectionTimeoutMS: 8000,
+      });
+    try {
+      await connecting;
+    } finally {
+      connecting = undefined;
+    }
+  }
+  if (application) return application;
   const storage = createStorage();
   const ai = createAI();
   const worker = createWorker({ storage, ai });
