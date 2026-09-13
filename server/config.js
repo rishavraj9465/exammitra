@@ -14,6 +14,8 @@ export const config = {
   secret: process.env.JWT_SECRET || "",
   origin: process.env.CLIENT_URL || "http://127.0.0.1:5173",
   model: process.env.GEMINI_MODEL || "gemini-3.6-flash",
+  generationModel:
+    process.env.GEMINI_GENERATION_MODEL || "gemini-3.5-flash-lite",
   apiKey: process.env.GEMINI_API_KEY || "",
   storage: process.env.STORAGE_DRIVER || "local",
   dataDir: process.env.DATA_DIR || path.join(root, ".data"),

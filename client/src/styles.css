@@ -915,6 +915,8 @@ dialog::backdrop {
 }
 .app-topbar {
   height: 76px;
+  position: relative;
+  z-index: 100;
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
@@ -961,7 +963,7 @@ dialog::backdrop {
   transform: rotate(180deg);
 }
 .app-profile-wrap .home-profile-menu {
-  z-index: 50;
+  z-index: 110;
 }
 .sample-link {
   font-size: 12px;

@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { z } from "zod";
 import { config } from "../config.js";
 import { chunkPages } from "./pdf.js";
@@ -103,7 +103,8 @@ export function createAI(options = config) {
   const ai = options.apiKey
     ? new GoogleGenAI({ apiKey: options.apiKey })
     : null;
-  async function request(contents, schema, validate) {
+  const generationModel = options.generationModel || options.model;
+  async function request(contents, schema, validate, model = options.model) {
     if (!ai)
       throw new Error(
         "Gemini is not configured. Add GEMINI_API_KEY to the server environment. The sample study pack is available meanwhile.",
@@ -112,13 +113,14 @@ export function createAI(options = config) {
     for (let i = 0; i < 3; i++)
       try {
         const response = await ai.models.generateContent({
-          model: options.model,
+          model,
           contents,
           config: {
             systemInstruction: system,
             responseMimeType: "application/json",
             responseJsonSchema: schema,
             httpOptions: { timeout: 90000 },
+            thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
             temperature: 0.2,
           },
         });
@@ -144,6 +146,7 @@ export function createAI(options = config) {
           `Create ${detail} revision notes from the complete source below. Include an overview, topic notes covering every supplied page, key terms, formulas only if present, exactly FIVE multiple-choice questions (4 distinct options each, zero-based answer index), and exactly TEN flashcards. Every item must cite only the original page numbers.\nSOURCE:\n${completeSource}`,
           jsonSchema,
           (v) => validateContent(v, pages.length),
+          generationModel,
         );
         await onProgress(1, 1);
         return content;
@@ -160,6 +163,7 @@ export function createAI(options = config) {
             }),
           }),
           (v) => z.object({ concepts: z.array(note).min(1) }).parse(v),
+          generationModel,
         );
         const allowed = new Set(
           [...chunks[i].matchAll(/\[Page (\d+)\]/g)].map((m) => Number(m[1])),
@@ -181,6 +185,7 @@ export function createAI(options = config) {
         `Create ${detail} revision notes from ALL of the evidence below. Include an overview, topic notes, key terms, formulas only if present, exactly FIVE multiple-choice questions (4 distinct options each, zero-based answer index) and exactly TEN flashcards. Use only original page citations in the evidence.\n${JSON.stringify(evidence)}`,
         jsonSchema,
         (v) => validateContent(v, pages.length),
+        generationModel,
       );
     },
     async answer(pages, question, kind = "question") {
