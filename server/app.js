@@ -297,7 +297,16 @@ export function createApp({ storage, ai, options = config, worker } = {}) {
     }
   });
   app.get("/api/packs/:packId", async (req, res) => {
-    await Pack.updateOne({ _id: req.pack._id }, { lastOpenedAt: new Date() });
+    // Processing pages poll this route frequently. Avoid a MongoDB write on every
+    // poll because it competes with the worker's status and content updates.
+    if (
+      req.pack.status === "ready" &&
+      Date.now() - new Date(req.pack.lastOpenedAt || 0).getTime() > 60000
+    )
+      Pack.updateOne(
+        { _id: req.pack._id },
+        { lastOpenedAt: new Date() },
+      ).catch(() => {});
     const [job, attempt, cards, messages] = await Promise.all([
       Job.findOne({ pack: req.pack._id }),
       Attempt.findOne({

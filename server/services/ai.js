@@ -221,6 +221,7 @@ export function createAI(options = config) {
             result.answer = "I could not find that in your material.";
           return result;
         },
+        generationModel,
       );
     },
   };
